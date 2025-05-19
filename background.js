@@ -159,6 +159,7 @@ chrome.runtime.onInstalled.addListener(() => {
                   }
                   .warehouse-info {
                       margin-top: 10px;
+                      font-weight: bold;
                   }
                   .date-info {
                       margin-top: 10px;
