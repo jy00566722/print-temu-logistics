@@ -11,11 +11,24 @@ chrome.runtime.onInstalled.addListener(() => {
   // 处理右键菜单点击
   chrome.contextMenus.onClicked.addListener((info, tab) => {
     if (info.menuItemId === "printOrderInfo") {
-      // 修改这里，添加获取店铺名称的逻辑
       chrome.tabs.sendMessage(tab.id, {action: "getSelection"}, (response) => {
-          if (response && response.shopName) {
-              handleSelectedText(info.selectionText, tab, response.shopName);
-          }
+        if (response && response.shopName) {
+          // 弹出对话框让用户选择袋数
+          chrome.scripting.executeScript({
+            target: {tabId: tab.id},
+            func: () => {
+              return prompt("请输入袋数 (1-10):", "1");
+            }
+          }, (result) => {
+            const bagCount = result[0].result;
+            // 验证输入
+            if (bagCount && !isNaN(bagCount) && bagCount >= 1 && bagCount <= 10) {
+              handleSelectedText(info.selectionText, tab, response.shopName, parseInt(bagCount));
+            } else {
+              alert("请输入1-10之间的数字！");
+            }
+          });
+        }
       });
     }
   });
@@ -26,7 +39,21 @@ chrome.runtime.onInstalled.addListener(() => {
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, {action: "getSelection"}, (response) => {
           if (response && response.selectionText && response.shopName) {
-            handleSelectedText(response.selectionText, tabs[0], response.shopName);
+            // 弹出对话框让用户选择袋数
+            chrome.scripting.executeScript({
+              target: {tabId: tabs[0].id},
+              func: () => {
+                return prompt("请输入袋数 (1-10):", "1");
+              }
+            }, (result) => {
+              const bagCount = result[0].result;
+              // 验证输入
+              if (bagCount && !isNaN(bagCount) && bagCount >= 1 && bagCount <= 10) {
+                handleSelectedText(response.selectionText, tabs[0], response.shopName, parseInt(bagCount));
+              } else {
+                alert("请输入1-10之间的数字！");
+              }
+            });
           }
         });
       });
@@ -34,31 +61,32 @@ chrome.runtime.onInstalled.addListener(() => {
   });
   
 
-  function handleSelectedText(selectedText, tab, shopName) {
-      console.log("处理选中文本:", selectedText);
-      console.log("店铺名称:", shopName);
-      const orderInfo = extractOrderInfoFromText(selectedText);
-      
-      if (orderInfo) {
-          console.log("提取的订单信息:", orderInfo);
-          const printContent = generatePrintContent({ ...orderInfo, shopName: shopName });
-          chrome.scripting.executeScript({
-              target: {tabId: tab.id},
-              func: (content) => {
-                  const printWindow = window.open('', '_blank');
-                  printWindow.document.write(content);
-                  printWindow.document.close();
-                  printWindow.onload = function() {
-                      printWindow.print();
-                      setTimeout(() => {
-                          // printWindow.close();
-                      }, 100);
-                  };
-              },
-              args: [printContent]
-          });
-      }
-  }
+  function handleSelectedText(selectedText, tab, shopName, bagCount = 1) {
+    console.log("处理选中文本:", selectedText);
+    console.log("店铺名称:", shopName);
+    console.log("袋数:", bagCount);
+    const orderInfo = extractOrderInfoFromText(selectedText);
+    
+    if (orderInfo) {
+        console.log("提取的订单信息:", orderInfo);
+        const printContent = generatePrintContent({ ...orderInfo, shopName: shopName, bagCount: bagCount });
+        chrome.scripting.executeScript({
+            target: {tabId: tab.id},
+            func: (content) => {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(content);
+                printWindow.document.close();
+                printWindow.onload = function() {
+                    printWindow.print();
+                    setTimeout(() => {
+                        // printWindow.close();
+                    }, 100);
+                };
+            },
+            args: [printContent]
+        });
+    }
+}
   
 
   function generatePrintContent(info) {
@@ -93,6 +121,11 @@ chrome.runtime.onInstalled.addListener(() => {
                       border: 1px solid black;
                       padding: 10px;
                   }
+                  .a1{
+                      display: flex;
+                      justify-content: space-between;
+                      
+                  }
                   .header {
                       text-align: center;
                       border-bottom: 1px solid black;
@@ -102,11 +135,19 @@ chrome.runtime.onInstalled.addListener(() => {
                       background-color: black;
                       color: white;
                   }
+                  
                   .logNumber{
                       text-align: center;
                       font-weight: bold;
                       margin-left: 20px;
-                      font-size: 20px;
+                      margin-top: 5px;
+                      margin-bottom: 5px;
+                      font-size: 24px;
+                  }
+                  .bgcount{
+                    font-weight: bold;
+                    font-size: 20px;
+                    margin-left: 50px;
                   }
                   .info-table {
                       width: 100%;
@@ -122,13 +163,21 @@ chrome.runtime.onInstalled.addListener(() => {
                   .date-info {
                       margin-top: 10px;
                   }
+                 .address1{
+                      margin-felt: 100px;
+                      font-size: 14px;
+                  }
               </style>
           </head>
           <body>
               <div class="order-container">
                   <div class="header">TEMU物流单</div>
-                  <div class="shop-info">店铺：${info.shopName || '未知店铺'}</div>
-                  <div class="logMethod">${info.logisticsMethod || '安能物流'}</div>
+                  <div class="a1">
+                      <span class="logMethod">${info.logisticsMethod || '||'}</span>
+                        <span class="shop-info">店铺：${info.shopName || '未知店铺'}</span>
+                  </div>
+                
+
                   <div class="logNumber">${info.trackingNumber || ''}</div>
                   <table class="info-table">
                       <tr>
@@ -137,7 +186,7 @@ chrome.runtime.onInstalled.addListener(() => {
                       </tr>
                       ${productRows}
                   </table>
-                  <div>共${totalQuantity}件</div>
+                   <div>共${totalQuantity}双 <span class="bgcount">共${info.bagCount || 1}袋</span></div>
                   <div class="warehouse-info">收货仓: ${info.warehouse || ''}</div>
                   <div class="date-info">${new Date().toLocaleString('zh-CN', { 
                       year: 'numeric',
@@ -146,8 +195,9 @@ chrome.runtime.onInstalled.addListener(() => {
                       weekday: 'long',
                       hour: '2-digit',
                       minute: '2-digit',
-                      hour12: true
+                      hour12: false
                   })}</div>
+                  <div class="address1">发货仓:晋江五星南路65号四楼</div>
               </div>
           </body>
           </html>`;
