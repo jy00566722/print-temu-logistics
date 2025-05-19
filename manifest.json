@@ -1,0 +1,45 @@
+{
+    "manifest_version": 3,
+    "name": "订单信息打印机",
+    "version": "1.2.1",
+    "description": "从跨境卖货平台提取选中订单信息并打印",
+    "icons": {
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "permissions": [
+      "activeTab",
+      "scripting",
+      "contextMenus",
+      "clipboardRead",
+      "storage"
+    ],
+    "content_scripts": [
+      {
+        "matches": ["https://seller.kuajingmaihuo.com/*"],
+        "js": ["content.js"]
+      }
+    ],
+    "host_permissions": [
+      "https://seller.kuajingmaihuo.com/*"
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "action": {
+      "default_popup": "popup/popup.html",
+      "default_icon": {
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+      }
+    },
+    "commands": {
+      "extract-and-print": {
+        "suggested_key": {
+          "default": "Ctrl+Shift+P",
+          "mac": "Command+Shift+P"
+        },
+        "description": "提取并打印选中订单"
+      }
+    }
+  }
