@@ -5,8 +5,10 @@ function getShopName() {
     const elements = document.querySelectorAll('span');
     for (const element of elements) {
         const text = element.textContent.trim();
-        if (text === 'Tongzhou Shoe Industry') return '通洲';
-        if (text === 'JIAN MIN SHOES AND CLOTHING') return '建闽';
+        if (text === 'Tongzhou Shoe Industry') return '通洲2';
+        if (text === 'JIAN MIN SHOES AND CLOTHING') return '建闽1';
+        if (text === 'XiaoQu Kids Shoes') return '晓漆3';
+        if (text === 'JianHui Shoes') return '建微4';
     }
     
     // 方法2：如果方法1失败，尝试在特定区域查找
@@ -15,8 +17,10 @@ function getShopName() {
         const spans = headerArea.querySelectorAll('span');
         for (const span of spans) {
             const text = span.textContent.trim();
-            if (text === 'Tongzhou Shoe Industry') return '通洲';
-            if (text === 'JIAN MIN SHOES AND CLOTHING') return '建闽';
+            if (text === 'Tongzhou Shoe Industry') return '通洲2';
+            if (text === 'JIAN MIN SHOES AND CLOTHING') return '建闽1';
+            if (text === 'XiaoQu Kids Shoes') return '晓漆3';
+            if (text === 'JianHui Shoes') return '建微4';
         }
     }
     

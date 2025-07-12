@@ -115,7 +115,7 @@ chrome.runtime.onInstalled.addListener(() => {
                       margin: 0;
                       padding: 5mm;
                       font-family: Arial, sans-serif;
-                      font-size: 18px;
+                      font-size: 20px;
                   }
                   .order-container {
                       border: 1px solid black;
@@ -142,11 +142,11 @@ chrome.runtime.onInstalled.addListener(() => {
                       margin-left: 20px;
                       margin-top: 5px;
                       margin-bottom: 5px;
-                      font-size: 24px;
+                      font-size: 28px;
                   }
                   .bgcount{
                     font-weight: bold;
-                    font-size: 20px;
+                    font-size: 24px;
                     margin-left: 50px;
                   }
                   .info-table {
@@ -166,7 +166,7 @@ chrome.runtime.onInstalled.addListener(() => {
                   }
                  .address1{
                       margin-felt: 100px;
-                      font-size: 14px;
+                      font-size: 18px;
                   }
               </style>
           </head>
