@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "订单信息打印机",
-    "version": "1.2.1",
+    "version": "1.8.1",
     "description": "从跨境卖货平台提取选中订单信息并打印",
     "icons": {
         "48": "icons/icon48.png",
