@@ -1,3 +1,5 @@
+importScripts("js/shop-config.js");
+
 // 创建右键菜单
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
@@ -12,6 +14,10 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.onClicked.addListener((info, tab) => {
     if (info.menuItemId === "printOrderInfo") {
       chrome.tabs.sendMessage(tab.id, {action: "getSelection"}, (response) => {
+        if (chrome.runtime.lastError) {
+          showPageNotice(tab.id, "无法读取页面内容，请刷新订单页面后重试。", "error");
+          return;
+        }
         if (response && response.shopName) {
           // 弹出对话框让用户选择袋数
           chrome.scripting.executeScript({
@@ -20,47 +26,21 @@ chrome.runtime.onInstalled.addListener(() => {
               return prompt("请输入袋数 (1-10):", "1");
             }
           }, (result) => {
-            const bagCount = result[0].result;
+            const bagCount = result && result[0] ? result[0].result : null;
             // 验证输入
             if (bagCount && !isNaN(bagCount) && bagCount >= 1 && bagCount <= 10) {
               handleSelectedText(info.selectionText, tab, response.shopName, parseInt(bagCount));
             } else {
-              alert("请输入1-10之间的数字！");
+              showPageNotice(tab.id, "请输入1-10之间的数字。", "error");
             }
           });
+        } else {
+          showPageNotice(tab.id, "没有读取到选中内容，请先选中一条订单信息。", "error");
         }
       });
     }
   });
   
-  // 处理快捷键
-  chrome.commands.onCommand.addListener((command) => {
-    if (command === "extract-and-print") {
-      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {action: "getSelection"}, (response) => {
-          if (response && response.selectionText && response.shopName) {
-            // 弹出对话框让用户选择袋数
-            chrome.scripting.executeScript({
-              target: {tabId: tabs[0].id},
-              func: () => {
-                return prompt("请输入袋数 (1-10):", "1");
-              }
-            }, (result) => {
-              const bagCount = result[0].result;
-              // 验证输入
-              if (bagCount && !isNaN(bagCount) && bagCount >= 1 && bagCount <= 10) {
-                handleSelectedText(response.selectionText, tabs[0], response.shopName, parseInt(bagCount));
-              } else {
-                alert("请输入1-10之间的数字！");
-              }
-            });
-          }
-        });
-      });
-    }
-  });
-  
-
   function handleSelectedText(selectedText, tab, shopName, bagCount = 1) {
     console.log("处理选中文本:", selectedText);
     console.log("店铺名称:", shopName);
@@ -85,7 +65,42 @@ chrome.runtime.onInstalled.addListener(() => {
             },
             args: [printContent]
         });
+    } else {
+        showPageNotice(tab.id, "解析订单失败：请确认选中的内容包含物流单号、货号、发货数量等订单信息。", "error");
     }
+}
+
+function showPageNotice(tabId, message, type = "info") {
+    chrome.scripting.executeScript({
+        target: {tabId},
+        func: (noticeMessage, noticeType) => {
+            const existingNotice = document.getElementById("temu-print-extension-notice");
+            if (existingNotice) existingNotice.remove();
+
+            const notice = document.createElement("div");
+            notice.id = "temu-print-extension-notice";
+            notice.textContent = noticeMessage;
+            notice.style.position = "fixed";
+            notice.style.top = "20px";
+            notice.style.right = "20px";
+            notice.style.zIndex = "2147483647";
+            notice.style.maxWidth = "360px";
+            notice.style.padding = "12px 16px";
+            notice.style.borderRadius = "6px";
+            notice.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.18)";
+            notice.style.fontSize = "14px";
+            notice.style.lineHeight = "1.5";
+            notice.style.fontFamily = "Arial, sans-serif";
+            notice.style.color = "#fff";
+            notice.style.background = noticeType === "error" ? "#c62828" : "#1565c0";
+
+            document.body.appendChild(notice);
+            setTimeout(() => {
+                notice.remove();
+            }, 4000);
+        },
+        args: [message, type]
+    });
 }
   
 
@@ -206,6 +221,7 @@ chrome.runtime.onInstalled.addListener(() => {
   
 
   function extractOrderInfoFromText(text) {
+    // TODO: 当前先保持原有页面文本解析规则不变；后续如果商家后台格式变化，再集中优化这里的正则。
     // 提取物流信息 - 修改正则表达式以适应新格式
     const logisticsMatch = text.match(/物流单号：\s*(.+?)，(.+?)(?:\s|$)/);
     

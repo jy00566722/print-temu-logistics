@@ -5,12 +5,129 @@
   <title>订单信息打印机</title>
   <style>
     body {
-      width: 300px;
-      padding: 10px;
+      width: 420px;
+      margin: 0;
+      padding: 14px;
       font-family: Arial, sans-serif;
+      color: #1f2933;
+      background: #f7f9fc;
     }
+
+    h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    h4 {
+      margin: 16px 0 8px;
+      font-size: 14px;
+    }
+
     .instructions {
       margin-bottom: 15px;
+      padding: 10px 12px;
+      background: #fff;
+      border: 1px solid #dde3ea;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .instructions p {
+      margin: 0 0 6px;
+      font-weight: bold;
+    }
+
+    .instructions ol {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .shop-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .shop-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(74px, 0.75fr) 32px;
+      gap: 6px;
+      align-items: center;
+      padding: 8px;
+      background: #fff;
+      border: 1px solid #dde3ea;
+      border-radius: 6px;
+    }
+
+    .shop-row.locked .shop-name {
+      background: #eef2f7;
+      color: #52606d;
+    }
+
+    input {
+      box-sizing: border-box;
+      width: 100%;
+      min-width: 0;
+      height: 32px;
+      padding: 6px 8px;
+      border: 1px solid #c7d0d9;
+      border-radius: 4px;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    button {
+      height: 32px;
+      border: 1px solid #aab7c4;
+      border-radius: 4px;
+      background: #fff;
+      color: #1f2933;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    button:hover {
+      background: #eef2f7;
+    }
+
+    button.primary {
+      border-color: #1f6feb;
+      background: #1f6feb;
+      color: #fff;
+    }
+
+    button.primary:hover {
+      background: #195fc8;
+    }
+
+    button.danger {
+      color: #b42318;
+      border-color: #f0b8b8;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      color: #9aa5b1;
+      background: #eef2f7;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .status {
+      min-height: 18px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #276749;
+    }
+
+    .hint {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #66788a;
     }
   </style>
 </head>
@@ -21,8 +138,22 @@
     <ol>
       <li>在订单页面选中要打印的订单内容</li>
       <li>右键点击选择"打印选中订单信息"</li>
-      <li>或使用快捷键 Ctrl+Shift+P (Windows) / Command+Shift+P (Mac)</li>
     </ol>
   </div>
+
+  <h4>店铺代号配置</h4>
+  <div id="shopList" class="shop-list"></div>
+  <div class="hint">默认四个店铺不能删除，但可以修改代号；新增店铺可自由删除。</div>
+
+  <div class="actions">
+    <button id="addShop" type="button">新增店铺</button>
+    <button id="saveShops" class="primary" type="button">保存配置</button>
+    <button id="resetShops" type="button">恢复默认</button>
+  </div>
+
+  <div id="status" class="status" aria-live="polite"></div>
+
+  <script src="../js/shop-config.js"></script>
+  <script src="popup.js"></script>
 </body>
 </html>
