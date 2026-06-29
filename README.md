@@ -12,12 +12,14 @@ Chrome Manifest V3 扩展，用于在跨境卖货平台订单发货列表页提�
 
 ## 店铺配置
 
-popup 中内置四个默认店铺：
+popup 中内置六个默认店铺：
 
 - `Tongzhou Shoe Industry`
 - `JIAN MIN SHOES AND CLOTHING`
 - `XiaoQu Kids Shoes`
 - `JianHui Shoes`
+- `Coastal Steps`
+- `Zen Fee`
 
 默认店铺不能删除，避免核心业务映射丢失；但可以修改对应的店铺代号。用户也可以新增自定义店铺映射，自定义店铺可以删除。
 

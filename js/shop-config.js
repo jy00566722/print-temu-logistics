@@ -23,6 +23,18 @@
             shopName: "JianHui Shoes",
             code: "建微4",
             locked: true
+        },
+        {
+            id: "coastal-steps",
+            shopName: "Coastal Steps",
+            code: "CS店",
+            locked: true
+        },
+        {
+            id: "zen-fee",
+            shopName: "Zen Fee",
+            code: "ZF店",
+            locked: true
         }
     ];
 
