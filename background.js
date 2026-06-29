@@ -213,7 +213,7 @@ function showPageNotice(tabId, message, type = "info") {
                       minute: '2-digit',
                       hour12: false
                   })}</div>
-                  <div class="address1">发货仓:晋江五星南路65号四楼</div>
+                  <div class="address1">发货仓:晋江湖中地顶57号2楼</div>
               </div>
           </body>
           </html>`;
